@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Switch, Route, NavLink, useHistory } from "react-router-dom";
 import Movie from "./components/Movie";
 import FavMovie from "./components/FavMovie";
-import { nextMovie } from "./store/actions/movieActions";
+import {
+  firstMovie,
+  nextMovie,
+  previousMovie,
+} from "./store/actions/movieActions";
 import { addFavorite } from "./store/actions/favActions";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -10,13 +14,23 @@ function App() {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const sira = useSelector((store) => store.movieScroll.sira);
+  const { sira, disabledNavigation } = useSelector(
+    (store) => store.movieScroll
+  );
   const movies = useSelector((store) => store.movieScroll.movies);
 
   const favMovies = useSelector((store) => store.favorites.favorites);
 
   function sonrakiFilm() {
     dispatch(nextMovie());
+  }
+
+  function oncekiFilm() {
+    dispatch(previousMovie());
+  }
+
+  function firstFilm() {
+    dispatch(firstMovie());
   }
 
   function addFavoriteHandler(movie) {
@@ -48,8 +62,23 @@ function App() {
 
           <div className="flex gap-3 justify-end py-3">
             <button
+              disabled={disabledNavigation === "previous"}
+              onClick={firstFilm}
+              className="disabled:opacity-50 select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
+            >
+              Başa Dön
+            </button>
+            <button
+              disabled={disabledNavigation === "previous"}
+              onClick={oncekiFilm}
+              className="disabled:opacity-50 select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
+            >
+              Önceki Film
+            </button>
+            <button
+              disabled={disabledNavigation === "next"}
               onClick={sonrakiFilm}
-              className="select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
+              className="disabled:opacity-50 select-none px-4 py-2 border border-blue-700 text-blue-700 hover:border-blue-500 hover:text-blue-500"
             >
               Sıradaki
             </button>
@@ -65,7 +94,7 @@ function App() {
         <Route path="/listem">
           <div>
             {favMovies.map((movie) => (
-              <FavMovie key={movie.id} title={movie.title} id={movie.id} />
+              <FavMovie key={movie.id} movie={movie} />
             ))}
           </div>
         </Route>
